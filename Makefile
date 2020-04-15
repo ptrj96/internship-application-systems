@@ -10,5 +10,5 @@ ping: ping.o
 	$(CC) $(CFLAGS) ping.o -o ping
 
 clean:
-	rm -r ping
+	rm -r ping *.o
 
