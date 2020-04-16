@@ -1,6 +1,6 @@
 /*
 Because of the use of Raw sockets this program must be 
-run with root (sudo) user priveleges.
+run with root (sudo) user privileges.
 */
 
 
