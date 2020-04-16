@@ -1,14 +1,14 @@
 CC = gcc
 CFLAGS = -g -Wall
 
-all: ping
+all: myping
 
-ping.o: ping.c
-	$(CC) $(CFLAGS) -c ping.c
+myping.o: myping.c
+	$(CC) $(CFLAGS) -c myping.c
 
-ping: ping.o
-	$(CC) $(CFLAGS) ping.o -o ping
+myping: myping.o
+	$(CC) $(CFLAGS) myping.o -o myping -lm
 
 clean:
-	rm -r ping *.o
+	rm -r myping *.o
 
