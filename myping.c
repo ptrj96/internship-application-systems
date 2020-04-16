@@ -32,6 +32,7 @@ int main(int argc, char**argv)
     int addr_ret;
     int socketfd;
 
+    //Opening raw socket requires root privelege
     if(geteuid() != 0)
     {
         printf("Must run as root\n");
@@ -49,7 +50,7 @@ int main(int argc, char**argv)
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_UNSPEC; //ipv4 or ipv6
     hints.ai_socktype = SOCK_RAW; //raw socket for icmp
-    hints.ai_protocol = IPPROTO_ICMP;
+    hints.ai_protocol = IPPROTO_ICMP; //protocol for icmp
 
     addr_ret = getaddrinfo(argv[1], NULL, &hints, &addr);
     if (addr_ret != 0)
@@ -59,6 +60,7 @@ int main(int argc, char**argv)
     }
 
 
+    //Loop through list to find valid address
     for (result = addr; result != NULL; result=result->ai_next)
     {
         socketfd = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
@@ -74,6 +76,7 @@ int main(int argc, char**argv)
         close(socketfd);
     }
 
+    //if result is null no addresses were valid
     if (result == NULL)
     {
         fprintf(stderr, "Could not connect to %s\n", argv[1]);
@@ -84,6 +87,7 @@ int main(int argc, char**argv)
     timeout.tv_sec = 3;
     timeout.tv_usec = 0;
 
+    //Set timeout options for sockets
     if (setsockopt (socketfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
     {
         fprintf(stderr, "setsockopt failed\n");
@@ -142,7 +146,8 @@ void ping(int sockfd, char* host)
             printf("Failed recv\n");
             success = 0;
         }
-
+        
+        //Code must be 0 and type of 69(echo) for valid response
         if (success && !(pkt.icmp_hdr.code == 0) && !(pkt.icmp_hdr.type == 69))
         {
             success = 0;
@@ -186,11 +191,13 @@ void ping(int sockfd, char* host)
 
 }
 
+//Gracefully handle interupt signal 
 void sigint_handler(int sig)
 {
     keep_pinging = 0;
 }
 
+//perform checksum for icmp
 unsigned short checksum(void *b, int len) 
 {    
     unsigned short *buf = b; 
