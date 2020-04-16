@@ -1,3 +1,9 @@
+/*
+Because of the use of Raw sockets this program must be 
+run with root (sudo) user priveleges.
+*/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
