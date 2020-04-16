@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
-#include <netinet/ip_icmp.h>
 #include <arpa/inet.h> 
 #include <netdb.h>
 #include <sys/types.h>
@@ -10,6 +9,8 @@
 #include <signal.h>
 #include <time.h>
 #include <math.h>
+#include <netinet/ip.h>
+#include <netinet/ip_icmp.h>
 
 #define PING_PKT_SIZE  64
 
