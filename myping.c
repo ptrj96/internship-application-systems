@@ -29,12 +29,18 @@ int keep_pinging = 1;
 int main(int argc, char**argv)
 {
     struct addrinfo hints, *result, *addr;
-    int error;
+    int addr_ret;
     int socketfd;
+
+    if(geteuid() != 0)
+    {
+        printf("Must run as root\n");
+        exit(1);
+    }
 
     if (argc < 2)
     {
-        printf("Usage: %s <hostname/ip address>\n", argv[0]);
+        printf("Usage: %s [hostname/ip address]\n", argv[0]);
         exit(1);
     }
 
@@ -45,8 +51,8 @@ int main(int argc, char**argv)
     hints.ai_socktype = SOCK_RAW; //raw socket for icmp
     hints.ai_protocol = IPPROTO_ICMP;
 
-    error = getaddrinfo(argv[1], NULL, &hints, &addr);
-    if (error != 0)
+    addr_ret = getaddrinfo(argv[1], NULL, &hints, &addr);
+    if (addr_ret != 0)
     {
         fprintf(stderr, "Error with getaddrinfo\n");
         exit(1);
