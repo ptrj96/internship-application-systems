@@ -104,7 +104,8 @@ void ping(int sockfd, char* host)
 
     int num_sent = 0, num_passed = 0, i, success;
     struct timespec s;
-    double time_start, time_sent, time_received, time_finished, time_rtt, time_total;
+    double time_start, time_sent, time_received, time_finished, time_rtt, time_total,
+            rtt_min = INFINITY, rtt_max = -INFINITY, rtt_total = 0, rtt_avg;
     struct packet pkt;
 
     clock_gettime(CLOCK_MONOTONIC, &s);
@@ -155,6 +156,18 @@ void ping(int sockfd, char* host)
         {
             printf("%ld bytes from %s: time=%f\n", sizeof(pkt), host, time_rtt);
         }
+
+        if (time_rtt > rtt_max)
+        {
+            rtt_max = time_rtt;
+        }
+        else if (time_rtt < rtt_min)
+        {
+            rtt_min = time_rtt;
+        }
+
+        rtt_total += time_rtt;
+
         sleep(1);
     }
 
@@ -162,10 +175,12 @@ void ping(int sockfd, char* host)
     time_finished = (double)(s.tv_sec);
     time_total = (time_finished - time_start) * 1000;
     float percent_loss = (((float)num_sent-(float)num_passed)/(float)num_sent) * 100.0f;
+    rtt_avg = rtt_total/num_sent;
 
     printf("\n--- %s ping statistics ---\n", host);
     printf("%d packets trasnmitted, %d received, %f%% packet loss, time %fms\n", 
         num_sent, num_passed, percent_loss, time_total);
+    printf("rtt min/avg/max = %f/%f/%f\n", rtt_min, rtt_avg, rtt_max);
     
     close(sockfd);
 
