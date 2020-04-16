@@ -19,6 +19,7 @@ run with root (sudo) user priveleges.
 #include <netinet/ip_icmp.h>
 
 #define PING_PKT_SIZE  64
+#define TYPE_ECHO 69
 
 struct packet
 {
@@ -38,7 +39,7 @@ int main(int argc, char**argv)
     int addr_ret;
     int socketfd;
 
-    //Opening raw socket requires root privelege
+    //Opening raw socket requires root privilege
     if(geteuid() != 0)
     {
         printf("Must run as root\n");
@@ -132,14 +133,14 @@ void ping(int sockfd, char* host)
 
         for (i = 0; i < sizeof(pkt.buf); ++i)
         {
-            pkt.buf[i] = i+'0';
+            pkt.buf[i] = i + '0';
         }
         pkt.buf[i] = 0;
 
         pkt.icmp_hdr.checksum = checksum(&pkt, sizeof(pkt));
         
         clock_gettime(CLOCK_MONOTONIC, &s);
-        time_sent = (double)(s.tv_nsec / 1.0e6);
+        time_sent = (double)(s.tv_nsec/1.0e6);
 
         if (send(sockfd, &pkt, sizeof(pkt), 0) <= 0)
         {
@@ -154,13 +155,13 @@ void ping(int sockfd, char* host)
         }
         
         //Code must be 0 and type of 69(echo) for valid response
-        if (success && !(pkt.icmp_hdr.code == 0) && !(pkt.icmp_hdr.type == 69))
+        if (success && !(pkt.icmp_hdr.code == 0) && !(pkt.icmp_hdr.type == TYPE_ECHO))
         {
             success = 0;
         }
 
         clock_gettime(CLOCK_MONOTONIC, &s);
-        time_received = (double)(s.tv_nsec / 1.0e6);
+        time_received = (double)(s.tv_nsec/1.0e6);
         time_rtt = time_received - time_sent;
         num_passed+=success;
         if (success)
@@ -184,12 +185,12 @@ void ping(int sockfd, char* host)
 
     clock_gettime(CLOCK_MONOTONIC, &s);
     time_finished = (double)(s.tv_sec);
-    time_total = (time_finished - time_start) * 1000;
-    float percent_loss = (((float)num_sent-(float)num_passed)/(float)num_sent) * 100.0f;
+    time_total = (time_finished - time_start)*1000;
+    float percent_loss = (((float)num_sent-(float)num_passed)/(float)num_sent)*100.0f;
     rtt_avg = rtt_total/num_sent;
 
     printf("\n--- %s ping statistics ---\n", host);
-    printf("%d packets trasnmitted, %d received, %f%% packet loss, time %fms\n", 
+    printf("%d packets transmitted, %d received, %f%% packet loss, time %fms\n", 
         num_sent, num_passed, percent_loss, time_total);
     printf("rtt min/avg/max = %f/%f/%f\n", rtt_min, rtt_avg, rtt_max);
     
@@ -207,7 +208,7 @@ void sigint_handler(int sig)
 unsigned short checksum(void *b, int len) 
 {    
     unsigned short *buf = b; 
-    unsigned int sum=0; 
+    unsigned int sum = 0; 
     unsigned short result; 
   
     for ( sum = 0; len > 1; len -= 2 )
