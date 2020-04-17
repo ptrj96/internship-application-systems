@@ -114,13 +114,13 @@ void ping(int sockfd, char* host)
     printf("PING %s\n", host);
 
     int num_sent = 0, num_passed = 0, i, success;
-    struct timespec s;
+    struct timespec start_spec, send_spec, rec_spec, end_spec;
     double time_start, time_sent, time_received, time_finished, time_rtt, time_total,
             rtt_min = INFINITY, rtt_max = -INFINITY, rtt_total = 0, rtt_avg;
     struct packet pkt;
 
-    clock_gettime(CLOCK_MONOTONIC, &s);
-    time_start = (double)(s.tv_sec);
+    clock_gettime(CLOCK_MONOTONIC, &start_spec);
+    time_start = (double)(start_spec.tv_sec*1000)+(double)(start_spec.tv_nsec/1.0e6);
 
     while (keep_pinging)
     {
@@ -139,8 +139,9 @@ void ping(int sockfd, char* host)
 
         pkt.icmp_hdr.checksum = checksum(&pkt, sizeof(pkt));
         
-        clock_gettime(CLOCK_MONOTONIC, &s);
-        time_sent = (double)(s.tv_nsec/1.0e6);
+        clock_gettime(CLOCK_MONOTONIC, &send_spec);
+        time_sent = (double)(send_spec.tv_sec*1000)+(double)(send_spec.tv_nsec/1.0e6);
+        
 
         if (send(sockfd, &pkt, sizeof(pkt), 0) <= 0)
         {
@@ -160,8 +161,8 @@ void ping(int sockfd, char* host)
             success = 0;
         }
 
-        clock_gettime(CLOCK_MONOTONIC, &s);
-        time_received = (double)(s.tv_nsec/1.0e6);
+        clock_gettime(CLOCK_MONOTONIC, &rec_spec);
+        time_received = (double)(rec_spec.tv_sec*1000)+(double)(rec_spec.tv_nsec/1.0e6);
         time_rtt = time_received - time_sent;
         num_passed+=success;
         if (success)
@@ -183,9 +184,9 @@ void ping(int sockfd, char* host)
         sleep(1);
     }
 
-    clock_gettime(CLOCK_MONOTONIC, &s);
-    time_finished = (double)(s.tv_sec);
-    time_total = (time_finished - time_start)*1000;
+    clock_gettime(CLOCK_MONOTONIC, &end_spec);
+    time_finished = (double)(end_spec.tv_sec*1000)+(double)(end_spec.tv_nsec/1.0e6);
+    time_total = (time_finished - time_start);
     float percent_loss = (((float)num_sent-(float)num_passed)/(float)num_sent)*100.0f;
     rtt_avg = rtt_total/num_sent;
 
@@ -209,7 +210,7 @@ unsigned short checksum(void *b, int len)
 {    
     unsigned short *buf = b; 
     unsigned int sum = 0; 
-      
+
     for ( sum = 0; len > 1; len -= 2 )
     {
         sum += *buf++;
